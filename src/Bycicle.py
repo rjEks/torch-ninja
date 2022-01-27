@@ -6,7 +6,7 @@ import pandas as pd
 
 class Bycicle(Dataset):
     
-    def __init__(self, csv_path, scaler_feat=None, scaler_label=None) -> None:
+    def __init__(self, csv_path, scaler_feat=None, scaler_label=None):
         self.dados = pd.read_csv(csv_path).to_numpy()
         
     def __getitem__(self, idx):
@@ -15,7 +15,7 @@ class Bycicle(Dataset):
          label  = self.dados[idx][-1:]
         
          sample = torch.from_numpy(sample.astype(np.float32))
-         label = torch.from_numpy(label.astye(np.float32))
+         label = torch.from_numpy(label.astype(np.float32))
          
          return sample, label
      

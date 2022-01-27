@@ -1,4 +1,6 @@
 import torch
+from torch import nn
+from torch import optim
 from torch.utils.data import DataLoader
 
 args ={
@@ -21,6 +23,8 @@ def trainTestSplit(df):
     
     df_train.to_csv('../data/train.csv',index=False)
     df_test.to_csv('../data/test.csv',index=False)    
+    
+    return df_train, df_test
 
 
 def returnIsCuda() -> str:        
@@ -32,7 +36,7 @@ def returnIsCuda() -> str:
     return args['device']
 
 
-def setArgs(args) -> dict:
+def setArgs() -> dict:
     return args
 
 def createDataLoader(train, test, batch_size, num_workers):
@@ -51,3 +55,9 @@ def createDataLoader(train, test, batch_size, num_workers):
         shuffle=False
     )
     
+    return train_loader, test_loader
+
+def setCrtiterionAndLoss(network,lr,weigth_decay):
+    criterion = nn.L1Loss().to(returnIsCuda())
+    optimizer = optim.Adam(network.parameters(), lr=args['lr'], weight_decay=args['weight_decay'])
+    return criterion , optimizer
