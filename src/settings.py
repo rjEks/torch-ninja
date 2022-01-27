@@ -1,4 +1,5 @@
 import torch
+from torch.utils.data import DataLoader
 
 args ={
     'epoch_num': 300,     # Número de épocas.
@@ -18,11 +19,11 @@ def trainTestSplit(df):
     df_train = df.iloc[indexes[:train_size]]
     df_test = df.iloc[indexes[train_size:]]
     
-    df_train.to_csv('train.csv',index=False)
-    df_test.to_csv('test.csv',index=False)    
+    df_train.to_csv('../data/train.csv',index=False)
+    df_test.to_csv('../data/test.csv',index=False)    
 
 
-def returnIsCuda() -> bool:        
+def returnIsCuda() -> str:        
     if torch.cuda.is_available():
         args['device'] = torch.device('cuda')
     else:
@@ -34,3 +35,19 @@ def returnIsCuda() -> bool:
 def setArgs(args) -> dict:
     return args
 
+def createDataLoader(train, test, batch_size, num_workers):
+    
+    train_loader = DataLoader(
+        train,
+        batch_size,
+        num_workers=num_workers,
+        shuffle=True
+        )
+
+    test_loader = DataLoader(
+        test,
+        batch_size,
+        num_workers=num_workers,
+        shuffle=False
+    )
+    
