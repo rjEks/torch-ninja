@@ -35,7 +35,7 @@ if __name__ == '__main__':
     with torch.no_grad():
         y_pred = model(sample_tensor)
 
-    print("Valor Predito : ", (y_pred.item()))
-    print("Valor Real : ", (y_test.iloc[45]))
+    print("Valor Predito: ", (y_pred.item()))
+    print("Valor Real: ", (y_test.iloc[45]))
 
    
