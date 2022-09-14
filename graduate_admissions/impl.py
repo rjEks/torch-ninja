@@ -1,6 +1,8 @@
 from app import Net
 
 if __name__ == '__main__':
+    
+    print("Test different activate functions")
     net = Net(hidden_size=3, activation_fn='sigmoid', apply_dropout=False)
     result_3_sigmoid = Net.train_and_evaluate_model(net)
 
