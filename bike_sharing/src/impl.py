@@ -94,10 +94,10 @@ def running():
     ypred = network(Xtest).cpu().data
     
     # Combine predictions and actual values
-    data = torch.cat((ypred, ytest), axis=1)
+    data = torch.cat((ytest, ypred), axis=1)
     
-    # Create DataFrame with results
-    df_results = pd.DataFrame(data.numpy(), columns=['ypred', 'ytest'])
+    # Create DataFrame with results (first column: actual, second column: predicted)
+    df_results = pd.DataFrame(data.numpy(), columns=['ytest', 'ypred'])
     print("\nFirst 20 predictions:")
     print(df_results.head(20))
 

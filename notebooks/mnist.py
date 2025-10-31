@@ -36,15 +36,6 @@ class Net(nn.Module):
     - Fully connected layer 1: 320 -> 50 neurons
     - Fully connected layer 2: 50 -> 10 neurons (output)
     """
-    """
-    Convolutional Neural Network for MNIST digit classification.
-    
-    Architecture:
-    - Conv layer 1: 1 -> 10 channels, 5x5 kernel
-    - Conv layer 2: 10 -> 20 channels, 5x5 kernel (with dropout)
-    - Fully connected layer 1: 320 -> 50 neurons
-    - Fully connected layer 2: 50 -> 10 neurons (output)
-    """
     
     def __init__(self):
         """Initialize the CNN architecture."""

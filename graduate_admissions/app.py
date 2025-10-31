@@ -15,23 +15,27 @@ class Net(nn.Module):
     and optional dropout regularization.
     """
     
-    def __init__(self, input_size, output_size, hidden_size, activation_fn='relu', apply_dropout=False):
+    def __init__(self, hidden_size, activation_fn='relu', apply_dropout=False, input_size=None, output_size=None):
         """
         Initialize the neural network.
         
         Args:
-            input_size: Number of input features
-            output_size: Number of output classes
             hidden_size: Number of neurons in hidden layers
             activation_fn: Activation function ('relu', 'sigmoid', or 'tanh')
             apply_dropout: Whether to apply dropout regularization
+            input_size: Number of input features (if None, must be set as global variable)
+            output_size: Number of output classes (if None, must be set as global variable)
         """
         super(Net, self).__init__()
         
+        # Use provided values or fall back to global variables for backward compatibility
+        _input_size = input_size if input_size is not None else globals().get('input_size', 7)
+        _output_size = output_size if output_size is not None else globals().get('output_size', 1)
+        
         # Define fully connected layers
-        self.fc1 = nn.Linear(input_size, hidden_size) 
+        self.fc1 = nn.Linear(_input_size, hidden_size) 
         self.fc2 = nn.Linear(hidden_size, hidden_size)
-        self.fc3 = nn.Linear(hidden_size, output_size)
+        self.fc3 = nn.Linear(hidden_size, _output_size)
         
         self.hidden_size = hidden_size
         self.activation_fn = activation_fn
