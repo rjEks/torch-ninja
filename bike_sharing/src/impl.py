@@ -1,4 +1,4 @@
-from Bycicle import Bycicle
+from Bycicle import Bicycle
 from mlp_impl import MLP
 import settings
 import pandas as pd
@@ -6,67 +6,101 @@ import train
 import validate
 import torch
 
-#Running cycles and epochs
 
 def running():
+    """
+    Main function to run the bicycle sharing prediction model.
     
+    This function performs the following steps:
+    1. Loads and splits the dataset
+    2. Creates data loaders
+    3. Initializes the neural network
+    4. Trains the model
+    5. Evaluates the model on test data
+    """
+    # Load the dataset
     df = pd.read_csv("../data/hour.csv")
-    print(len(df))
+    print("Total samples:", len(df))
     
-    df_train, df_test = settings.trainTestSplit(df)
+    # Split into training and test sets
+    df_train, df_test = settings.train_test_split(df)
     
-    print("Train size: " + str(len(df_train)))
-    print("Test Size: " + str(len(df_test)))
+    print("Train size:", len(df_train))
+    print("Test size:", len(df_test))
     
-    print("Convert dataset")
-    train_set = Bycicle("../data/train.csv")
-    test_set = Bycicle("../data/test.csv")    
+    # Convert DataFrames to PyTorch datasets
+    print("Converting dataset...")
+    train_set = Bicycle("../data/train.csv")
+    test_set = Bicycle("../data/test.csv")
     
-    print("Get Args")
-    args = settings.setArgs()    
+    # Get training configuration
+    print("Getting configuration arguments...")
+    args = settings.get_args()
     
-    print("Create Dataloader")
-    train_loader, test_loader = settings.createDataLoader(train_set,test_set,args["batch_size"],args["num_workers"])
+    # Create data loaders for batch processing
+    print("Creating DataLoaders...")
+    train_loader, test_loader = settings.create_data_loader(
+        train_set, test_set, args["batch_size"], args["num_workers"]
+    )
     
-    print("Check Dimensions")
+    # Check data dimensions
+    print("Checking dimensions...")
     for batch in test_loader:
         sample, label = batch
-        print(sample.size(), label.size())
+        print("Sample size:", sample.size(), "Label size:", label.size())
         break
     
-    print("Set Variables")
+    # Set network architecture parameters
+    print("Setting network variables...")
     input_size = train_set[0][0].size(0)
     hidden_size = 128
-    out_size = 1    
+    out_size = 1
     
-    network = MLP(input_size,hidden_size,out_size).to(settings.returnIsCuda())
+    # Initialize the neural network and move to appropriate device
+    network = MLP(input_size, hidden_size, out_size).to(settings.get_device())
+    print("Network architecture:")
     print(network)
     
-    print("set criterion and loss")
-    criterion, optimizer = settings.setCrtiterionAndLoss(network,args["lr"],args["weight_decay"])    
+    # Initialize loss function and optimizer
+    print("Setting criterion and optimizer...")
+    criterion, optimizer = settings.set_criterion_and_optimizer(
+        network, args["lr"], args["weight_decay"]
+    )
     
+    # Lists to store loss values for monitoring
     train_losses, test_losses = [], []
     
+    # Training loop
+    print("\nStarting training...")
     for epoch in range(args['epoch_num']):
+        # Train for one epoch
+        train_loss = train.train(
+            train_loader, network, epoch, settings.get_device(), criterion, optimizer
+        )
+        train_losses.append(train_loss)
         
-        #Trainning
-        train_losses.append(train.train(train_loader, network,epoch,settings.returnIsCuda(),criterion,optimizer))
-        
-        #Evaluate
-        train_losses.append(validate.validate(train_loader, network,epoch,settings.returnIsCuda(),criterion))
+        # Validate on test set
+        test_loss = validate.validate(
+            test_loader, network, epoch, settings.get_device(), criterion
+        )
+        test_losses.append(test_loss)
     
-    
+    # Final evaluation on test set
+    print("\nPerforming final evaluation...")
     Xtest = torch.stack([tup[0] for tup in test_set])
-    Xtest = Xtest.to(settings.returnIsCuda())
-
+    Xtest = Xtest.to(settings.get_device())
+    
     ytest = torch.stack([tup[1] for tup in test_set])
     ypred = network(Xtest).cpu().data
-
+    
+    # Combine predictions and actual values
     data = torch.cat((ytest, ypred), axis=1)
+    
+    # Create DataFrame with results (first column: actual, second column: predicted)
+    df_results = pd.DataFrame(data.numpy(), columns=['ytest', 'ypred'])
+    print("\nFirst 20 predictions:")
+    print(df_results.head(20))
 
-    df_results = pd.DataFrame(data, columns=['ypred', 'ytest'])
-    df_results.head(20)
-    
-if __name__=="__main__":
+
+if __name__ == "__main__":
     running()
-    
